@@ -1,19 +1,30 @@
 from fastapi import FastAPI, Request
-import subprocess, json
+import requests
 
 app = FastAPI()
+
+OLLAMA_URL = "http://localhost:11434/api/generate"
+MODEL_NAME = "josue-model"
+
+@app.get("/")
+def home():
+    return {"mensaje": "Servidor Ollama + FastAPI activo 🚀"}
 
 @app.post("/chat")
 async def chat(request: Request):
     data = await request.json()
     mensaje = data.get("mensaje", "")
 
-    # Ejecutar ollama desde el contenedor
-    proceso = subprocess.run(
-        ["ollama", "run", "josue-model"],
-        input=mensaje.encode(),
-        capture_output=True
-    )
+    payload = {
+        "model": MODEL_NAME,
+        "prompt": mensaje
+    }
 
-    respuesta = proceso.stdout.decode()
-    return {"respuesta": respuesta}
+    try:
+        response = requests.post(OLLAMA_URL, json=payload)
+        response.raise_for_status()
+        result = response.json()
+        return {"respuesta": result.get("response", "")}
+    except Exception as e:
+        return {"error": str(e)}
+

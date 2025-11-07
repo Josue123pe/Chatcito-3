@@ -1,21 +1,19 @@
 # Imagen base con Ollama
 FROM ollama/ollama
 
-# Copiar tu modelo
-COPY Modelfile /Modelfile
+# Crear carpeta de trabajo
+WORKDIR /app
 
-# Crear el modelo
-RUN ollama create josue-model -f /Modelfile
+# Copiar archivos del proyecto
+COPY . .
 
-# Instalar dependencias para FastAPI
+# Instalar dependencias
 RUN apt-get update && apt-get install -y python3 python3-pip
 RUN pip install fastapi uvicorn
 
-# Copiar el archivo principal
-COPY main.py /main.py
-
-# Exponer el puerto
+# Exponer puerto
 EXPOSE 8000
 
-# Ejecutar el servidor
-CMD ollama serve & uvicorn main:app --host 0.0.0.0 --port 8000
+# Iniciar Ollama, crear el modelo (una vez iniciado el servidor) y luego lanzar FastAPI
+CMD ollama serve & sleep 5 && ollama create josue-model -f /app/Modelfile && uvicorn main:app --host 0.0.0.0 --port 8000
+
