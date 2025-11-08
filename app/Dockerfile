@@ -11,7 +11,7 @@ RUN curl -fsSL https://ollama.com/install.sh | sh
 COPY Modelfile /Modelfile
 
 # Crear el modelo personalizado
-RUN ollama serve & sleep 5 && ollama create josue-model -f /Modelfile
+CMD ollama serve & sleep 8 && ollama create josue-model -f /Modelfile && uvicorn main:app --host 0.0.0.0 --port 8000
 
 # Copiar tus archivos de la app
 COPY main.py /main.py
